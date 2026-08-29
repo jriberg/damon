@@ -1,0 +1,54 @@
+// Copyright IBM Corp. 2021, 2023
+// SPDX-License-Identifier: MPL-2.0
+
+package view
+
+import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/hashicorp/nomad/api"
+	"golang.org/x/term"
+)
+
+// Exec suspends the TUI and opens an interactive shell inside the given
+// task/allocation, equivalent to `nomad alloc exec -task <task> <allocID> /bin/sh`.
+func (v *View) Exec(taskName, allocID string) {
+	var execErr error
+
+	v.Layout.Container.Suspend(func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		resizeCh := make(chan api.TerminalSize, 1)
+		if w, h, err := term.GetSize(int(os.Stdout.Fd())); err == nil {
+			resizeCh <- api.TerminalSize{Width: w, Height: h}
+		}
+
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, syscall.SIGWINCH)
+		defer signal.Stop(sigCh)
+
+		go func() {
+			for range sigCh {
+				if w, h, err := term.GetSize(int(os.Stdout.Fd())); err == nil {
+					select {
+					case resizeCh <- api.TerminalSize{Width: w, Height: h}:
+					default:
+					}
+				}
+			}
+		}()
+
+		_, execErr = v.Client.Exec(ctx, allocID, taskName, []string{"/bin/sh"},
+			os.Stdin, os.Stdout, os.Stderr, resizeCh)
+	})
+
+	if execErr != nil {
+		v.handleError("exec failed: %s", execErr.Error())
+	}
+
+	v.Draw()
+}

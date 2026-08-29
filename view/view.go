@@ -4,6 +4,8 @@
 package view
 
 import (
+	"context"
+	"io"
 	"sync"
 
 	"github.com/hashicorp/nomad/api"
@@ -34,6 +36,8 @@ type Client interface {
 	GetJob(string) (*api.Job, error)
 	StartJob(job *api.Job) error
 	StopJob(string) error
+	Exec(ctx context.Context, allocID, taskName string, command []string,
+		stdin io.Reader, stdout, stderr io.Writer, resizeCh <-chan api.TerminalSize) (int, error)
 }
 
 // Watcher ...
