@@ -71,14 +71,28 @@ type CommandsProps struct {
 }
 
 func NewCommands() *Commands {
+	textView := primitive.NewTextView(tview.AlignLeft)
+	textView.ModifyPrimitive(disableWrap)
+
+	viewTextView := primitive.NewTextView(tview.AlignLeft)
+	viewTextView.ModifyPrimitive(disableWrap)
+
 	return &Commands{
-		TextView:     primitive.NewTextView(tview.AlignLeft),
-		ViewTextView: primitive.NewTextView(tview.AlignLeft),
+		TextView:     textView,
+		ViewTextView: viewTextView,
 		Props: &CommandsProps{
 			MainCommands: MainCommands,
 			ViewCommands: JobCommands,
 		},
 	}
+}
+
+// disableWrap keeps each command on a single row: on a narrow terminal a
+// wrapped line pushes every entry below it down, which can shove later
+// commands past the header's visible height entirely. Truncating a long
+// line is preferable to losing whole entries off-screen.
+func disableWrap(t *tview.TextView) {
+	t.SetWrap(false)
 }
 
 func (c *Commands) Update(commands []string) {
