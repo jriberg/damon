@@ -29,6 +29,7 @@ const (
 	LabelTaskGroup         = "TaskGroup"
 	LabelTime              = "Time"
 	LabelMessage           = "Message"
+	LabelReady             = "Ready"
 
 	LabelCPU       = "CPU"
 	LabelMemory    = "Memory"

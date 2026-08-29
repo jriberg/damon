@@ -157,6 +157,9 @@ func (w *Watcher) update(topic api.Topic) {
 		w.updateJobs()
 	case api.TopicAllocation:
 		w.updateAllocations()
+		// Allocation health drives job ready-status, so jobs must be
+		// refreshed whenever allocations change.
+		w.updateJobs()
 	case api.TopicDeployment:
 		w.updateDeployments()
 	}
