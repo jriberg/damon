@@ -49,6 +49,7 @@ var (
 		fmt.Sprintf("%s<h>%s highlight", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<s>%s stop log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<r>%s resume log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<p>%s pretty-print JSON lines", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	DeploymentCommands = []string{}
