@@ -162,6 +162,7 @@ func (v *View) Init(version string) {
 
 	// Commands
 	v.components.Commands.Bind(v.Layout.Header.SlotCmd)
+	v.components.Commands.BindView(v.Layout.Header.SlotViewCmd)
 	v.components.Commands.Render()
 
 	// Selections
