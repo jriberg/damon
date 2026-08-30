@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/hashicorp/nomad/api"
 	"golang.org/x/term"
@@ -19,6 +20,12 @@ func (v *View) Exec(taskName, allocID string) {
 	var execErr error
 
 	v.Layout.Container.Suspend(func() {
+		// tcell may send terminal queries (e.g. cursor position reports) as
+		// part of tearing down the screen; the terminal's reply can arrive
+		// just after control is handed over here, and would otherwise be
+		// read by the remote shell as literal input. Drain it first.
+		drainStdin(100 * time.Millisecond)
+
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
@@ -51,4 +58,23 @@ func (v *View) Exec(taskName, allocID string) {
 	}
 
 	v.Draw()
+}
+
+// drainStdin discards any bytes already buffered on stdin, for up to
+// timeout, without blocking indefinitely if nothing arrives.
+func drainStdin(timeout time.Duration) {
+	if err := os.Stdin.SetReadDeadline(time.Now().Add(timeout)); err != nil {
+		// Deadlines aren't supported on this stdin (e.g. not a pollable
+		// file); draining would risk blocking forever, so skip it.
+		return
+	}
+	defer os.Stdin.SetReadDeadline(time.Time{})
+
+	buf := make([]byte, 256)
+	for {
+		n, err := os.Stdin.Read(buf)
+		if n <= 0 || err != nil {
+			return
+		}
+	}
 }
