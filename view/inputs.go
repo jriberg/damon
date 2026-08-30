@@ -76,7 +76,7 @@ func (v *View) InputMainCommands(event *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyRune:
 		switch event.Rune() {
 
-		case 's':
+		case 'n':
 			if !v.Layout.Footer.HasFocus() {
 				v.Layout.Container.SetFocus(v.state.Elements.DropDownNamespace)
 			}
