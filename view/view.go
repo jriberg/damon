@@ -81,6 +81,7 @@ type Components struct {
 	TaskGroupTable  *component.TaskGroupTable
 	TaskEventsTable *component.TaskEventsTable
 	JumpToJob       *component.JumpToJob
+	GotoLine        *component.GotoLine
 	Error           *component.Error
 	Info            *component.Info
 	Failure         *component.Info
@@ -120,6 +121,13 @@ func (v *View) JumpToJob() {
 	v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 1)
 	jump.Render()
 	v.Layout.Container.SetFocus(jump.InputField.Primitive())
+}
+
+func (v *View) GotoLine() {
+	gotoLine := v.components.GotoLine
+	v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 1)
+	gotoLine.Render()
+	v.Layout.Container.SetFocus(gotoLine.InputField.Primitive())
 }
 
 func (v *View) LogSearch() {

@@ -21,6 +21,8 @@ var (
 		fmt.Sprintf("%s<ctrl-n>%s to display Namespaces", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-p>%s to jump to a Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-c>%s to Quit", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<h/j/k/l>%s left/down/up/right (same as esc/down/up/enter)", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<:NUM>%s to jump to line NUM", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	JobCommands = []string{

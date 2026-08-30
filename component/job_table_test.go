@@ -110,11 +110,11 @@ func TestJobTable_Happy(t *testing.T) {
 		row4, index4, c4 := fakeTable.RenderRowArgsForCall(3)
 		row5, index5, c5 := fakeTable.RenderRowArgsForCall(4)
 
-		expectedRow1 := []string{"ichi", "saturn", "service", "space", "running", "2/2", now.Format(time.RFC3339), "0s"}
-		expectedRow2 := []string{"ni", "jupiter", "service", "space", "pending", "2/2", now.Format(time.RFC3339), "0s"}
-		expectedRow3 := []string{"san", "neptun", "service", "space", "dead", "1/1", now.Format(time.RFC3339), "0s"}
-		expectedRow4 := []string{"chi", "mars", "batch", "space", "dead", "0/1", now.Format(time.RFC3339), "0s"}
-		expectedRow5 := []string{"yo", "venus", "service", "space", "running", "0/1", now.Format(time.RFC3339), "0s"}
+		expectedRow1 := []string{"1", "ichi", "saturn", "service", "space", "running", "2/2", now.Format(time.RFC3339), "0s"}
+		expectedRow2 := []string{"2", "ni", "jupiter", "service", "space", "pending", "2/2", now.Format(time.RFC3339), "0s"}
+		expectedRow3 := []string{"3", "san", "neptun", "service", "space", "dead", "1/1", now.Format(time.RFC3339), "0s"}
+		expectedRow4 := []string{"4", "chi", "mars", "batch", "space", "dead", "0/1", now.Format(time.RFC3339), "0s"}
+		expectedRow5 := []string{"5", "yo", "venus", "service", "space", "running", "0/1", now.Format(time.RFC3339), "0s"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)

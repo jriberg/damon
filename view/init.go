@@ -5,6 +5,7 @@ package view
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 
@@ -43,6 +44,24 @@ func (v *View) Init(version string) {
 
 		v.components.JumpToJob.InputField.SetText("")
 		v.state.Toggle.JumpToJob = false
+	}
+
+	// GotoLine
+	v.components.GotoLine.Bind(v.Layout.Footer)
+	v.components.GotoLine.Props.DoneFunc = func(key tcell.Key) {
+		v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 0)
+		v.Layout.Footer.RemoveItem(v.components.GotoLine.InputField.Primitive())
+		v.Layout.Container.SetFocus(v.state.Elements.TableMain)
+
+		if key == tcell.KeyEnter {
+			text := v.components.GotoLine.InputField.GetText()
+			if line, err := strconv.Atoi(text); err == nil && v.state.Elements.TableMain != nil {
+				v.state.Elements.TableMain.Select(line, 0)
+			}
+		}
+
+		v.components.GotoLine.InputField.SetText("")
+		v.state.Toggle.GotoLine = false
 	}
 
 	// LogSearchField
@@ -125,8 +144,7 @@ func (v *View) Init(version string) {
 		v.Logs(taskName, allocID, "stdout")
 	}
 	v.components.TaskTable.BindKey(tcell.KeyCtrlE, func(event *tcell.EventKey) {
-		r, c := v.components.TaskTable.Table.GetSelection()
-		taskName := v.components.TaskTable.Table.GetCellContent(r, c)
+		taskName := v.components.TaskTable.GetNameForSelection()
 		allocID := v.components.TaskTable.Props.AllocationID
 
 		v.Logs(taskName, allocID, "stderr")

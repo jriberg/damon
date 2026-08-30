@@ -47,6 +47,21 @@ func (v *View) InputMainCommands(event *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyCtrlO, tcell.KeyEsc:
 		v.GoBack()
 
+	case tcell.KeyLeft:
+		// Same as Esc, but only when not editing a footer input field,
+		// where the left arrow needs to keep moving the text cursor.
+		if !v.Layout.Footer.HasFocus() {
+			v.GoBack()
+		}
+
+	case tcell.KeyRight:
+		// Same as pressing Enter on the currently selected row, but only
+		// when not editing a footer input field, where the right arrow
+		// needs to keep moving the text cursor.
+		if !v.Layout.Footer.HasFocus() {
+			return tcell.NewEventKey(tcell.KeyEnter, 0, tcell.ModNone)
+		}
+
 	case tcell.KeyCtrlP:
 		if !v.Layout.Footer.HasFocus() {
 			v.Layout.Container.SetFocus(v.components.LogSearch.InputField.Primitive())
@@ -64,6 +79,37 @@ func (v *View) InputMainCommands(event *tcell.EventKey) *tcell.EventKey {
 		case 's':
 			if !v.Layout.Footer.HasFocus() {
 				v.Layout.Container.SetFocus(v.state.Elements.DropDownNamespace)
+			}
+
+		case 'h':
+			if !v.Layout.Footer.HasFocus() {
+				v.GoBack()
+			}
+
+		case 'j':
+			if !v.Layout.Footer.HasFocus() {
+				return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
+			}
+
+		case 'k':
+			if !v.Layout.Footer.HasFocus() {
+				return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
+			}
+
+		case 'l':
+			if !v.Layout.Footer.HasFocus() {
+				return tcell.NewEventKey(tcell.KeyEnter, 0, tcell.ModNone)
+			}
+
+		case ':':
+			if !v.Layout.Footer.HasFocus() {
+				if !v.state.Toggle.GotoLine {
+					v.state.Toggle.GotoLine = true
+					v.GotoLine()
+				} else {
+					v.Layout.Container.SetFocus(v.components.GotoLine.InputField.Primitive())
+				}
+				return nil
 			}
 		}
 	}

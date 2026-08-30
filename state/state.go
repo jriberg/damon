@@ -47,6 +47,7 @@ type Filter struct {
 
 type Toggle struct {
 	JumpToJob    bool
+	GotoLine     bool
 	Search       bool
 	LogSearch    bool
 	LogHighlight bool
