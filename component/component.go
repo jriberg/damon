@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	LabelLineNumber        = "#"
 	LabelID                = "ID"
 	LabelJobID             = "JobID"
 	LabelType              = "Type"

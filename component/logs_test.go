@@ -7,6 +7,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/stretchr/testify/require"
 
@@ -14,6 +15,20 @@ import (
 	"github.com/hcjulz/damon/component/componentfakes"
 	"github.com/hcjulz/damon/styles"
 )
+
+func TestLogs_BorderColor(t *testing.T) {
+	r := require.New(t)
+
+	logs := component.NewLogger()
+
+	original := logs.GetBorderColor()
+
+	logs.SetBorderColor(tcell.ColorRed)
+	r.Equal(tcell.ColorRed, logs.GetBorderColor())
+
+	logs.SetBorderColor(original)
+	r.Equal(original, logs.GetBorderColor())
+}
 
 func TestLogs_Happy(t *testing.T) {
 	r := require.New(t)

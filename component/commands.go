@@ -21,6 +21,8 @@ var (
 		fmt.Sprintf("%s<ctrl-n>%s to display Namespaces", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-p>%s to jump to a Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-c>%s to Quit", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<h/j/k/l>%s left/down/up/right (same as esc/down/up/enter)", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<:NUM>%s to jump to line NUM", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	JobCommands = []string{
@@ -44,9 +46,9 @@ var (
 
 	LogCommands = []string{
 		fmt.Sprintf("%sLog Commands:", styles.HighlightSecondaryTag),
-		fmt.Sprintf("%s<Enter> | <ESC>%s to leave", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<Enter> | <ESC> | <h/l> | <left/right>%s to leave", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s</>%s apply filter", styles.HighlightPrimaryTag, styles.StandardColorTag),
-		fmt.Sprintf("%s<h>%s highlight", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<H>%s highlight", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<s>%s stop log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<r>%s resume log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<p>%s pretty-print JSON lines", styles.HighlightPrimaryTag, styles.StandardColorTag),
