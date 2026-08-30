@@ -18,6 +18,14 @@ import (
 func (v *View) Exec(taskName, allocID string) {
 	var execErr error
 
+	// The background watcher keeps polling/streaming while the screen is
+	// suspended and would otherwise call Draw() on every refresh - drawing
+	// to a screen that's mid-handoff to the exec session's raw terminal is
+	// unsafe and can leave tview's internal state out of sync with the
+	// actual terminal once we resume, which is what caused the TUI to come
+	// back blank and unresponsive after exiting the remote shell.
+	v.Watcher.Unsubscribe()
+
 	v.Layout.Container.Suspend(func() {
 		stdinFd := int(os.Stdin.Fd())
 
@@ -69,5 +77,15 @@ func (v *View) Exec(taskName, allocID string) {
 	// incremental Draw() isn't guaranteed to leave the terminal in sync with
 	// what tview thinks is on it.
 	v.Layout.Container.Sync()
+
+	// Re-render the Tasks view we came from: this both repaints known-good
+	// content (rather than relying on whatever was left over from before
+	// the suspend) and re-subscribes to the watcher we unsubscribed from
+	// above.
+	if alloc, ok := v.getAllocation(allocID); ok {
+		v.Tasks(alloc)
+		return
+	}
+
 	v.Draw()
 }
