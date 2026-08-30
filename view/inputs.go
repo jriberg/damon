@@ -123,7 +123,7 @@ func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
 
 func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 	switch event.Key() {
-	case tcell.KeyEsc, tcell.KeyCtrlO, tcell.KeyEnter:
+	case tcell.KeyEsc, tcell.KeyCtrlO, tcell.KeyEnter, tcell.KeyLeft, tcell.KeyRight:
 		if v.components.LogStream.TextView.Primitive().HasFocus() {
 			v.GoBack()
 			return nil
@@ -141,7 +141,12 @@ func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 				}
 
 			}
-		case 'h':
+		case 'h', 'l':
+			if v.components.LogStream.TextView.Primitive().HasFocus() {
+				v.GoBack()
+				return nil
+			}
+		case 'H':
 			if !v.Layout.Footer.HasFocus() {
 				if !v.state.Toggle.LogHighlight {
 					v.state.Toggle.LogHighlight = true
