@@ -69,6 +69,8 @@ func (v *View) Init(version string) {
 	v.components.LogSearch.Props.ChangedFunc = func(text string) {
 		v.state.Filter.Logs = text
 		v.components.LogStream.Props.Filter = text
+		v.components.LogStream.Render()
+		v.Draw()
 	}
 
 	v.components.LogSearch.Props.DoneFunc = func(key tcell.Key) {
@@ -85,6 +87,8 @@ func (v *View) Init(version string) {
 	v.components.LogHighlight.Bind(v.Layout.Footer)
 	v.components.LogHighlight.Props.ChangedFunc = func(text string) {
 		v.components.LogStream.Props.Highlight = text
+		v.components.LogStream.Render()
+		v.Draw()
 	}
 
 	v.components.LogHighlight.Props.DoneFunc = func(key tcell.Key) {
@@ -180,6 +184,7 @@ func (v *View) Init(version string) {
 
 	// Commands
 	v.components.Commands.Bind(v.Layout.Header.SlotCmd)
+	v.components.Commands.BindView(v.Layout.Header.SlotViewCmd)
 	v.components.Commands.Render()
 
 	// Selections

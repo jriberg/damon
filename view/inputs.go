@@ -180,6 +180,13 @@ func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 				v.Watcher.ResumeLogs()
 
 			}
+		case 'p':
+			if !v.Layout.Footer.HasFocus() {
+				v.state.Toggle.PrettyJSON = !v.state.Toggle.PrettyJSON
+				v.components.LogStream.Props.PrettyJSON = v.state.Toggle.PrettyJSON
+				v.components.LogStream.Render()
+				v.Draw()
+			}
 		}
 	}
 

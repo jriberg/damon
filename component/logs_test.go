@@ -49,6 +49,25 @@ func TestLogs_Happy(t *testing.T) {
 		r.Equal(string(text), "logs")
 	})
 
+	t.Run("When PrettyJSON is enabled", func(t *testing.T) {
+		textView := &componentfakes.FakeTextView{}
+		logs := component.NewLogger()
+		logs.TextView = textView
+		logs.Props.HandleNoResources = func(format string, args ...interface{}) {}
+		logs.Props.PrettyJSON = true
+		logs.Props.Data = []byte(`plain text line
+{"foo":"bar","n":1}
+not json {at all`)
+
+		logs.Bind(tview.NewFlex())
+
+		err := logs.Render()
+		r.NoError(err)
+
+		text := textView.SetTextArgsForCall(0)
+		r.Equal("plain text line\n{\n  \"foo\": \"bar\",\n  \"n\": 1\n}\nnot json {at all", string(text))
+	})
+
 	t.Run("When there is no data to render", func(t *testing.T) {
 		textView := &componentfakes.FakeTextView{}
 		logs := component.NewLogger()
