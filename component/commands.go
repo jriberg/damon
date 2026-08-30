@@ -24,7 +24,7 @@ var (
 	}
 
 	JobCommands = []string{
-		fmt.Sprintf("\n%sJob Commands:", styles.HighlightSecondaryTag),
+		fmt.Sprintf("%sJob Commands:", styles.HighlightSecondaryTag),
 		fmt.Sprintf("%s<Enter>%s to display allocations", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<t>%s to display TaskGroups for the selected Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<i>%s to display information for the selected Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
@@ -43,12 +43,13 @@ var (
 	}
 
 	LogCommands = []string{
-		fmt.Sprintf("\n%sLog Commands:", styles.HighlightSecondaryTag),
+		fmt.Sprintf("%sLog Commands:", styles.HighlightSecondaryTag),
 		fmt.Sprintf("%s<Enter> | <ESC>%s to leave", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s</>%s apply filter", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<h>%s highlight", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<s>%s stop log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<r>%s resume log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<p>%s pretty-print JSON lines", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	DeploymentCommands = []string{}
@@ -57,9 +58,11 @@ var (
 )
 
 type Commands struct {
-	TextView TextView
-	Props    *CommandsProps
-	slot     *tview.Flex
+	TextView     TextView
+	ViewTextView TextView
+	Props        *CommandsProps
+	slot         *tview.Flex
+	slotView     *tview.Flex
 }
 
 type CommandsProps struct {
@@ -68,13 +71,28 @@ type CommandsProps struct {
 }
 
 func NewCommands() *Commands {
+	textView := primitive.NewTextView(tview.AlignLeft)
+	textView.ModifyPrimitive(disableWrap)
+
+	viewTextView := primitive.NewTextView(tview.AlignLeft)
+	viewTextView.ModifyPrimitive(disableWrap)
+
 	return &Commands{
-		TextView: primitive.NewTextView(tview.AlignLeft),
+		TextView:     textView,
+		ViewTextView: viewTextView,
 		Props: &CommandsProps{
 			MainCommands: MainCommands,
 			ViewCommands: JobCommands,
 		},
 	}
+}
+
+// disableWrap keeps each command on a single row: on a narrow terminal a
+// wrapped line pushes every entry below it down, which can shove later
+// commands past the header's visible height entirely. Truncating a long
+// line is preferable to losing whole entries off-screen.
+func disableWrap(t *tview.TextView) {
+	t.SetWrap(false)
 }
 
 func (c *Commands) Update(commands []string) {
@@ -91,15 +109,28 @@ func (c *Commands) Render() error {
 	c.updateText()
 
 	c.slot.AddItem(c.TextView.Primitive(), 0, 1, false)
+
+	if c.slotView != nil {
+		c.slotView.AddItem(c.ViewTextView.Primitive(), 0, 1, false)
+	}
+
 	return nil
 }
 
 func (c *Commands) updateText() {
-	commands := append(c.Props.MainCommands, c.Props.ViewCommands...)
-	cmds := strings.Join(commands, "\n")
-	c.TextView.SetText(cmds)
+	c.TextView.SetText(strings.Join(c.Props.MainCommands, "\n"))
+
+	if c.slotView != nil {
+		c.ViewTextView.SetText(strings.Join(c.Props.ViewCommands, "\n"))
+	}
 }
 
 func (c *Commands) Bind(slot *tview.Flex) {
 	c.slot = slot
+}
+
+// BindView binds the slot that displays the current view's context-specific
+// commands, rendered to the right of the main Commands box.
+func (c *Commands) BindView(slot *tview.Flex) {
+	c.slotView = slot
 }

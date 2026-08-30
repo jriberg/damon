@@ -50,6 +50,7 @@ type Toggle struct {
 	Search       bool
 	LogSearch    bool
 	LogHighlight bool
+	PrettyJSON   bool
 }
 
 type Elements struct {

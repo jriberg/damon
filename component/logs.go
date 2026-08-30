@@ -5,6 +5,7 @@ package component
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -35,6 +36,7 @@ type LogStreamProps struct {
 	ChangedFunc       func()
 	TaskName          string
 	App               *tview.Application
+	PrettyJSON        bool
 }
 
 func NewLogger() *Logger {
@@ -81,7 +83,15 @@ func (l *Logger) Render() error {
 		l.Props.Data = bytes.Join(lines, []byte("\n"))
 	}
 
-	display := filter(l.Props.Data, l.Props.Filter)
+	data := l.Props.Data
+	if l.Props.PrettyJSON {
+		// Pretty-printing turns 1 raw line into N display lines, so filter()'s
+		// per-line regex may then only match a sub-line of a JSON block rather
+		// than the whole entry. Acceptable known limitation for now.
+		data = prettifyJSONLines(data)
+	}
+
+	display := filter(data, l.Props.Filter)
 
 	if l.Props.Filter == "" {
 		display = highlight(display, l.Props.Highlight)
@@ -153,6 +163,26 @@ func filter(logs []byte, filter string) []byte {
 		}
 	}
 	return result
+}
+
+// prettifyJSONLines indents any line that parses as valid JSON, leaving
+// non-JSON lines untouched.
+func prettifyJSONLines(logs []byte) []byte {
+	lines := bytes.Split(logs, []byte("\n"))
+	out := make([][]byte, 0, len(lines))
+
+	for _, line := range lines {
+		if json.Valid(line) {
+			var buf bytes.Buffer
+			if err := json.Indent(&buf, line, "", "  "); err == nil {
+				out = append(out, buf.Bytes())
+				continue
+			}
+		}
+		out = append(out, line)
+	}
+
+	return bytes.Join(out, []byte("\n"))
 }
 
 func highlight(logs []byte, highlight string) []byte {
