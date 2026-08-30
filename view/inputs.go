@@ -25,7 +25,7 @@ func (v *View) InputTaskGroups(event *tcell.EventKey) *tcell.EventKey {
 }
 
 func (v *View) InputAllocations(event *tcell.EventKey) *tcell.EventKey {
-	v.InputMainCommands(event)
+	event = v.InputMainCommands(event)
 	return v.inputAllocs(event)
 }
 
