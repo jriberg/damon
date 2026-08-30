@@ -123,9 +123,16 @@ func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
 
 func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 	switch event.Key() {
-	case tcell.KeyEsc, tcell.KeyCtrlO, tcell.KeyEnter, tcell.KeyLeft, tcell.KeyRight:
+	case tcell.KeyEsc, tcell.KeyCtrlO, tcell.KeyEnter, tcell.KeyLeft:
 		if v.components.LogStream.TextView.Primitive().HasFocus() {
 			v.GoBack()
+			return nil
+		}
+	case tcell.KeyRight:
+		// There's nothing further to "enter" from the log view - flash
+		// instead of leaving, like a terminal's visual bell.
+		if v.components.LogStream.TextView.Primitive().HasFocus() {
+			v.FlashLogBorder()
 			return nil
 		}
 	case tcell.KeyRune:
@@ -141,9 +148,17 @@ func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 				}
 
 			}
-		case 'h', 'l':
+		case 'h':
 			if v.components.LogStream.TextView.Primitive().HasFocus() {
 				v.GoBack()
+				return nil
+			}
+
+		case 'l':
+			// There's nothing further to "enter" from the log view - flash
+			// instead of leaving, like a terminal's visual bell.
+			if v.components.LogStream.TextView.Primitive().HasFocus() {
+				v.FlashLogBorder()
 				return nil
 			}
 		case 'H':

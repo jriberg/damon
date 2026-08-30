@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
 	"github.com/hcjulz/damon/models"
@@ -49,6 +50,23 @@ func NewLogger() *Logger {
 	t.ModifyPrimitive(l.applyLogModifiers)
 	return l
 
+}
+
+// GetBorderColor returns the log view's current border color.
+func (l *Logger) GetBorderColor() tcell.Color {
+	var c tcell.Color
+	l.TextView.ModifyPrimitive(func(t *tview.TextView) {
+		c = t.GetBorderColor()
+	})
+	return c
+}
+
+// SetBorderColor sets the log view's border color, e.g. to briefly flash it
+// to indicate there's nowhere further to go.
+func (l *Logger) SetBorderColor(c tcell.Color) {
+	l.TextView.ModifyPrimitive(func(t *tview.TextView) {
+		t.SetBorderColor(c)
+	})
 }
 
 func (l *Logger) Bind(slot *tview.Flex) {
