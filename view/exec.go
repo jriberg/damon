@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/hashicorp/nomad/api"
 	"golang.org/x/term"
@@ -20,11 +19,19 @@ func (v *View) Exec(taskName, allocID string) {
 	var execErr error
 
 	v.Layout.Container.Suspend(func() {
-		// tcell may send terminal queries (e.g. cursor position reports) as
-		// part of tearing down the screen; the terminal's reply can arrive
-		// just after control is handed over here, and would otherwise be
-		// read by the remote shell as literal input. Drain it first.
-		drainStdin(100 * time.Millisecond)
+		stdinFd := int(os.Stdin.Fd())
+
+		// Suspend() only restores the terminal to its normal ("cooked") mode,
+		// the same as dropping to an ordinary shell. In cooked mode the local
+		// tty driver intercepts control characters (Ctrl-C, Ctrl-D, ...) and
+		// turns them into local signals instead of forwarding them as literal
+		// bytes for the remote shell to interpret - e.g. Ctrl-C would kill
+		// Damon itself rather than interrupting the remote command. Put the
+		// local terminal in raw mode for the duration of the session, like
+		// `nomad alloc exec`/`docker exec -it` do.
+		if oldState, err := term.MakeRaw(stdinFd); err == nil {
+			defer term.Restore(stdinFd, oldState)
+		}
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -50,31 +57,17 @@ func (v *View) Exec(taskName, allocID string) {
 		}()
 
 		_, execErr = v.Client.Exec(ctx, allocID, taskName, []string{"/bin/sh"},
-			os.Stdin, os.Stdout, os.Stderr, resizeCh)
+			stripCPR(os.Stdin), os.Stdout, os.Stderr, resizeCh)
 	})
 
 	if execErr != nil {
 		v.handleError("exec failed: %s", execErr.Error())
 	}
 
+	// Force a full re-sync in addition to the normal draw: after a suspend,
+	// the screen buffer was torn down and redrawn from scratch, so a plain
+	// incremental Draw() isn't guaranteed to leave the terminal in sync with
+	// what tview thinks is on it.
+	v.Layout.Container.Sync()
 	v.Draw()
-}
-
-// drainStdin discards any bytes already buffered on stdin, for up to
-// timeout, without blocking indefinitely if nothing arrives.
-func drainStdin(timeout time.Duration) {
-	if err := os.Stdin.SetReadDeadline(time.Now().Add(timeout)); err != nil {
-		// Deadlines aren't supported on this stdin (e.g. not a pollable
-		// file); draining would risk blocking forever, so skip it.
-		return
-	}
-	defer os.Stdin.SetReadDeadline(time.Time{})
-
-	buf := make([]byte, 256)
-	for {
-		n, err := os.Stdin.Read(buf)
-		if n <= 0 || err != nil {
-			return
-		}
-	}
 }
