@@ -5,6 +5,7 @@ package component
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -27,6 +28,7 @@ const (
 
 var (
 	TableHeaderJobs = []string{
+		LabelLineNumber,
 		LabelID,
 		LabelName,
 		LabelType,
@@ -100,7 +102,7 @@ func (j *JobTable) Render() error {
 
 func (j *JobTable) GetIDForSelection() string {
 	row, _ := j.Table.GetSelection()
-	return j.Table.GetCellContent(row, 0)
+	return j.Table.GetCellContent(row, 1)
 }
 
 func (j *JobTable) validate() error {
@@ -121,14 +123,18 @@ func (j *JobTable) reset() {
 }
 
 func (j *JobTable) jobSelected(row, _ int) {
-	jobID := j.Table.GetCellContent(row, 0)
+	jobID := j.Table.GetCellContent(row, 1)
 	j.Props.SelectJob(jobID)
 }
 
 func (j *JobTable) renderRows() {
 	for i, job := range j.Props.Data {
+		index := i + 1
+
 		ready, rowColor := readyStatus(job.ReadyStatus, job.Status, job.DeploymentStatus)
+
 		row := []string{
+			strconv.Itoa(index),
 			job.ID,
 			job.Name,
 			job.Type,
@@ -138,8 +144,6 @@ func (j *JobTable) renderRows() {
 			job.SubmitTime.Format(time.RFC3339),
 			formatTimeSince(time.Since(job.SubmitTime)),
 		}
-
-		index := i + 1
 
 		j.Table.RenderRow(row, index, rowColor)
 	}

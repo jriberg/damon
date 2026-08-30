@@ -67,6 +67,7 @@ func main() {
 	taskTable := component.NewTaskTable()
 	logs := component.NewLogger()
 	jumpToJob := component.NewJumpToJob()
+	gotoLine := component.NewGotoLine()
 	logSearch := component.NewSearchField("/")
 	logHighlight := component.NewSearchField("highlight")
 	errorComp := component.NewError()
@@ -96,6 +97,7 @@ func main() {
 		LogStream:       logs,
 		LogHighlight:    logHighlight,
 		JumpToJob:       jumpToJob,
+		GotoLine:        gotoLine,
 		Error:           errorComp,
 		Info:            info,
 		Failure:         failure,

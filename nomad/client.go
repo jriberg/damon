@@ -5,6 +5,7 @@ package nomad
 
 import (
 	"context"
+	"io"
 
 	"github.com/hashicorp/nomad/api"
 )
@@ -28,6 +29,9 @@ type JobClient interface {
 type AllocationsClient interface {
 	List(*api.QueryOptions) ([]*api.AllocationListStub, *api.QueryMeta, error)
 	Info(string, *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error)
+	Exec(ctx context.Context, alloc *api.Allocation, task string, tty bool,
+		command []string, stdin io.Reader, stdout, stderr io.Writer,
+		terminalSizeCh <-chan api.TerminalSize, q *api.QueryOptions) (int, error)
 }
 
 //go:generate counterfeiter . AllocFSClient
