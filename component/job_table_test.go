@@ -212,6 +212,140 @@ func TestJobTable_Happy(t *testing.T) {
 	})
 }
 
+func TestJobTable_Sort(t *testing.T) {
+	r := require.New(t)
+
+	newData := func() []*models.Job {
+		now := time.Now()
+		return []*models.Job{
+			{ID: "b-id", Name: "beta", Type: "batch", Namespace: "ns2", Status: "running", SubmitTime: now.Add(-1 * time.Hour)},
+			{ID: "a-id", Name: "alpha", Type: "service", Namespace: "ns1", Status: "dead", SubmitTime: now.Add(-2 * time.Hour)},
+			{ID: "c-id", Name: "gamma", Type: "service", Namespace: "ns3", Status: "pending", SubmitTime: now},
+		}
+	}
+
+	t.Run("CycleSort advances through columns in order and wraps, always ascending", func(t *testing.T) {
+		jt := component.NewJobsTable()
+
+		expectedOrder := []string{
+			component.SortByID,
+			component.SortByName,
+			component.SortByType,
+			component.SortByNamespace,
+			component.SortByStatus,
+			component.SortBySubmitTime,
+			component.SortByUptime,
+			component.SortByID,
+		}
+
+		for _, expected := range expectedOrder {
+			jt.CycleSort()
+			r.Equal(expected, jt.Props.SortColumn)
+			r.True(jt.Props.SortAscending)
+		}
+	})
+
+	t.Run("FlipSortDirection toggles direction and is a no-op with no active sort", func(t *testing.T) {
+		jt := component.NewJobsTable()
+
+		// No-op: no column is sorted yet.
+		jt.FlipSortDirection()
+		r.Empty(jt.Props.SortColumn)
+		r.False(jt.Props.SortAscending)
+
+		jt.CycleSort()
+		r.True(jt.Props.SortAscending)
+
+		jt.FlipSortDirection()
+		r.False(jt.Props.SortAscending)
+
+		jt.FlipSortDirection()
+		r.True(jt.Props.SortAscending)
+	})
+
+	t.Run("Render sorts rows by ID ascending then descending", func(t *testing.T) {
+		fakeTable := &componentfakes.FakeTable{}
+		jt := component.NewJobsTable()
+		jt.Table = fakeTable
+		jt.Props.Data = newData()
+		jt.Props.SelectJob = func(id string) {}
+		jt.Props.HandleNoResources = func(format string, args ...interface{}) {}
+		jt.Bind(tview.NewFlex())
+
+		jt.Props.SortColumn = component.SortByID
+		jt.Props.SortAscending = true
+		r.NoError(jt.Render())
+
+		row1, _, _ := fakeTable.RenderRowArgsForCall(0)
+		row2, _, _ := fakeTable.RenderRowArgsForCall(1)
+		row3, _, _ := fakeTable.RenderRowArgsForCall(2)
+		r.Equal("a-id", row1[1])
+		r.Equal("b-id", row2[1])
+		r.Equal("c-id", row3[1])
+
+		header := fakeTable.RenderHeaderArgsForCall(fakeTable.RenderHeaderCallCount() - 1)
+		r.Contains(header, "ID ▲")
+
+		jt.Props.SortAscending = false
+		r.NoError(jt.Render())
+
+		row1, _, _ = fakeTable.RenderRowArgsForCall(3)
+		row2, _, _ = fakeTable.RenderRowArgsForCall(4)
+		row3, _, _ = fakeTable.RenderRowArgsForCall(5)
+		r.Equal("c-id", row1[1])
+		r.Equal("b-id", row2[1])
+		r.Equal("a-id", row3[1])
+
+		header = fakeTable.RenderHeaderArgsForCall(fakeTable.RenderHeaderCallCount() - 1)
+		r.Contains(header, "ID ▼")
+	})
+
+	t.Run("Render sorts rows by SubmitTime and Uptime as independent directions", func(t *testing.T) {
+		fakeTable := &componentfakes.FakeTable{}
+		jt := component.NewJobsTable()
+		jt.Table = fakeTable
+		jt.Props.Data = newData()
+		jt.Props.SelectJob = func(id string) {}
+		jt.Props.HandleNoResources = func(format string, args ...interface{}) {}
+		jt.Bind(tview.NewFlex())
+
+		// SubmitTime ascending: oldest submit time (a-id) first.
+		jt.Props.SortColumn = component.SortBySubmitTime
+		jt.Props.SortAscending = true
+		r.NoError(jt.Render())
+
+		row1, _, _ := fakeTable.RenderRowArgsForCall(0)
+		r.Equal("a-id", row1[1])
+
+		// Uptime ascending: smallest uptime, i.e. most recently submitted
+		// (c-id), first - the inverse of SubmitTime ascending.
+		jt.Props.SortColumn = component.SortByUptime
+		jt.Props.SortAscending = true
+		r.NoError(jt.Render())
+
+		row1, _, _ = fakeTable.RenderRowArgsForCall(3)
+		r.Equal("c-id", row1[1])
+	})
+
+	t.Run("Render leaves natural order and header unchanged with no sort set", func(t *testing.T) {
+		fakeTable := &componentfakes.FakeTable{}
+		jt := component.NewJobsTable()
+		jt.Table = fakeTable
+		jt.Props.Data = newData()
+		jt.Props.SelectJob = func(id string) {}
+		jt.Props.HandleNoResources = func(format string, args ...interface{}) {}
+		jt.Bind(tview.NewFlex())
+
+		r.NoError(jt.Render())
+
+		row1, _, _ := fakeTable.RenderRowArgsForCall(0)
+		r.Equal("b-id", row1[1])
+
+		header := fakeTable.RenderHeaderArgsForCall(0)
+		r.Equal(component.TableHeaderJobs, header)
+	})
+}
+
 func TestJobTable_Sad(t *testing.T) {
 	r := require.New(t)
 

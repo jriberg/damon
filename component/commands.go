@@ -21,6 +21,7 @@ var (
 		fmt.Sprintf("%s<ctrl-n>%s to display Namespaces", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-p>%s to jump to a Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-c>%s to Quit", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<n>%s to focus the Namespace dropdown", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<h/j/k/l>%s left/down/up/right (same as esc/down/up/enter)", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<:NUM>%s to jump to line NUM", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
@@ -32,6 +33,8 @@ var (
 		fmt.Sprintf("%s<i>%s to display information for the selected Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-s>%s start/stop the selected Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s</>%s apply filter", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<s>%s cycle sort column", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<S>%s flip sort direction", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	AllocCommands = []string{
