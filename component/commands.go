@@ -42,6 +42,7 @@ var (
 		fmt.Sprintf("%s<e>%s to display events for a Task", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-e>%s to display STDERR logs", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<Enter>%s to display STDOUT logs", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<x>%s to exec into a Task", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	LogCommands = []string{

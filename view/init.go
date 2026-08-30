@@ -160,6 +160,10 @@ func (v *View) Init(version string) {
 			allocID := v.components.TaskTable.Props.AllocationID
 			taskName := v.components.TaskTable.GetNameForSelection()
 			v.TaskEvents(allocID, taskName)
+		case 'x':
+			allocID := v.components.TaskTable.Props.AllocationID
+			taskName := v.components.TaskTable.GetNameForSelection()
+			v.Exec(taskName, allocID)
 		}
 	})
 
