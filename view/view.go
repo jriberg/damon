@@ -55,6 +55,8 @@ type Watcher interface {
 	SubscribeToLogs(allocID, taskName, source string, notify func())
 
 	ResumeLogs()
+
+	WatchClusterStats(interval time.Duration, notify func())
 }
 
 type View struct {
@@ -77,7 +79,7 @@ type Components struct {
 	Selections      *component.Selections
 	SelectorModal   *component.SelectorModal
 	Commands        *component.Commands
-	Logo            *component.Logo
+	ClusterStats    *component.ClusterStats
 	JobTable        *component.JobTable
 	TaskTable       *component.TaskTable
 	JobStatus       *component.JobStatus

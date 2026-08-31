@@ -22,6 +22,9 @@ type State struct {
 	Logs        []byte
 	JobStatus   *models.JobStatus
 
+	ClusterStats    *models.ClusterStats
+	ClusterStatsErr error
+
 	SelectedNamespace string
 	SelectedRegion    string
 

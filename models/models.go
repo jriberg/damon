@@ -88,25 +88,34 @@ type TaskGroupStatus struct {
 	StatusDescription string
 }
 
+type HostPort struct {
+	Label  string
+	HostIP string
+	Port   int
+}
+
 type Alloc struct {
-	ID            string
-	Name          string
-	Namespace     string
-	HostIP        string
-	HostAddresses []string
-	TaskGroup     string
-	Tasks         []AllocTask
-	TaskList      []*Task
-	TaskNames     []string
-	JobID         string
-	JobType       string
-	NodeID        string
-	NodeName      string
-	DesiredStatus string
-	Version       uint64
-	Status        string
-	Created       time.Time
-	Modified      time.Time
+	ID             string
+	Name           string
+	Namespace      string
+	HostIP         string
+	HostAddresses  []string
+	HostPorts      []HostPort
+	TaskGroup      string
+	Tasks          []AllocTask
+	TaskList       []*Task
+	TaskNames      []string
+	JobID          string
+	JobType        string
+	NodeID         string
+	NodeName       string
+	DesiredStatus  string
+	Version        uint64
+	Status         string
+	Created        time.Time
+	Modified       time.Time
+	AllocatedCPU   int
+	AllocatedMemMB int
 }
 
 type AllocTask struct {

@@ -6,6 +6,7 @@ package view
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/hcjulz/damon/styles"
 )
 
-func (v *View) Init(version string) {
+func (v *View) Init(version string, clusterStatsInterval time.Duration) {
 	// ClusterInfo
 	v.components.ClusterInfo.Props.Info = fmt.Sprintf(
 		"%sAddress%s: %s\n%sVersion:%s %s",
@@ -182,9 +183,20 @@ func (v *View) Init(version string) {
 	v.components.LogStream.Props.HandleNoResources = v.handleNoResources
 	v.components.LogStream.Props.App = v.Layout.Container
 
-	// Logo
-	v.components.Logo.Bind(v.Layout.Header.SlotLogo)
-	v.components.Logo.Render()
+	// ClusterStats
+	v.components.ClusterStats.Bind(v.Layout.Header.SlotLogo)
+	v.components.ClusterStats.Render()
+
+	updateClusterStats := func() {
+		v.components.ClusterStats.Props.Stats = v.state.ClusterStats
+		v.components.ClusterStats.Props.Err = v.state.ClusterStatsErr
+		v.components.ClusterStats.Props.Loaded = v.state.ClusterStats != nil
+
+		v.components.ClusterStats.Render()
+		v.Draw()
+	}
+
+	v.Watcher.WatchClusterStats(clusterStatsInterval, updateClusterStats)
 
 	// Commands
 	v.components.Commands.Bind(v.Layout.Header.SlotCmd)
